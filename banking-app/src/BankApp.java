@@ -1,336 +1,222 @@
-package com.bankappjdbc.ex;
+package com.bank.ex;
 
-import java.io.*;
-import java.sql.*;
+import java.io.BufferedReader;
+import java.io.Console;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.ref.Cleaner.Cleanable;
+
+class Customer {
+	String CustName;
+	int AccNo;
+	String Address;
+	String Gender;
+	int Age;
+	long MobileNumber;
+	int Balance;
+	String Password;
+
+	public String getPassword() {
+		return Password;
+	}
+
+	public void setPassword(String password) {
+		Password = password;
+	}
+
+	public int getBalance() {
+		return Balance;
+	}
+
+	public void setBalance(int balance) {
+		Balance = balance;
+	}
+
+	public String getCustName() {
+		return CustName;
+	}
+
+	public void setCustName(String custName) {
+		CustName = custName;
+	}
+
+	public int getAccNo() {
+		return AccNo;
+	}
+
+	public void setAccNo(int accNo) {
+		AccNo = accNo;
+	}
+
+	public String getAddress() {
+		return Address;
+	}
+
+	public void setAddress(String address) {
+		Address = address;
+	}
+
+	public String getGender() {
+		return Gender;
+	}
+
+	public void setGender(String gender) {
+		Gender = gender;
+	}
+
+	public int getAge() {
+		return Age;
+	}
+
+	public void setAge(int age) {
+		Age = age;
+	}
+
+	public long getMobileNumber() {
+		return MobileNumber;
+	}
+
+	public void setMobileNumber(long mobileNumber) {
+		MobileNumber = mobileNumber;
+	}
+
+}
 
 public class BankApp {
-	BufferedReader br;
+	BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-	public BankApp() {
-		this.br = new BufferedReader(new InputStreamReader(System.in));
-	}
+	void Deposite(Customer customers[]) throws NumberFormatException, IOException {
+		int AccNo;
+		int Amount;
+		System.out.println("Enter Account Number : ");
+		AccNo = Integer.parseInt(br.readLine());
+		System.out.println("Enter Amount : ");
+		Amount = Integer.parseInt(br.readLine());
 
-	public void registerCustomer() throws NumberFormatException, IOException {
+		for (Customer customer : customers) {
+			if (customer.AccNo == AccNo) {
+				customer.Balance = customer.Balance + Amount;
+				System.out.println("Updated Balance: " + customer.Balance);
 
-		System.out.println("Enter Customer ID: ");
-		int cid = Integer.parseInt(this.br.readLine());
-		System.out.println("Enter Customer Full Name: ");
-		String cname = this.br.readLine();
-		System.out.println("Enter Customer Mobile: ");
-		long cmob = Long.parseLong(this.br.readLine());
-		System.out.println("Enter Customer age: ");
-		int cage = Integer.parseInt(this.br.readLine());
-		System.out.println("Deposit Amount: ");
-		double damt = Double.parseDouble(this.br.readLine());
-		System.out.println("Enter Email: ");
-		String email = this.br.readLine();
-		System.out.println("Create Password: ");
-		String pswd = this.br.readLine();
-		Connection con = BankConnection.getConn();
-
-		try {
-			PreparedStatement st = con.prepareStatement(
-					"insert into customer(customerID, Name, Mobileno, age, depositedamount, Email, password) values(?,?,?,?,?,?,?)");
-			st.setInt(1, cid);
-			st.setString(2, cname);
-			st.setLong(3, cmob);
-			st.setInt(4, cage);
-			st.setDouble(5, damt);
-			st.setString(6, email);
-			st.setString(7, pswd);
-			int rs = st.executeUpdate();
-			if (rs == 1) {
-				System.out.println("Registered Successfully...");
-			} else {
-				System.out.println("Failed to Register");
 			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	public void Login() throws NumberFormatException, IOException {
-
-		System.out.println("Enter Email to Login: ");
-		String email = this.br.readLine();
-		System.out.println("Enter your Password: ");
-		String pswd = this.br.readLine();
-		Connection con = BankConnection.getConn();
-		try {
-			Statement st = con.createStatement();
-			String sql = "select * from customer";
-			ResultSet rs = st.executeQuery(sql);
-			while (rs.next()) {
-				if (rs.getString(6).equals(email) && rs.getString(7).equals(pswd)) {
-					System.out.println("login success");
-					CustomerEntity customer = new CustomerEntity();
-					customer.setCid(rs.getInt("customerID"));
-
-					loginSuccess(customer);
-				}
-			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
 	}
 
-	public void loginSuccess(CustomerEntity customer) throws NumberFormatException, IOException, SQLException {
-		BankApp obj = new BankApp();
+	void WithDraw(Customer customers[]) throws IOException, UsernamePasswordIncorrectException {
+		System.out.println("Enter Customer Name : ");
+		String CustName = br.readLine();
+		System.out.println("Enter Password : ");
+		String pass = br.readLine();
+		int temp = 0;
+		for (Customer customer : customers) {
+			if (customer.getCustName().equals(CustName) && customer.Password.equals(pass)) {
+				temp = 1;
+				System.out.println("Enter amount to withdraw : ");
+				int amount = Integer.parseInt(br.readLine());
+				customer.Balance = customer.Balance - amount;
+				System.out.println("Updated Amount : " + customer.getBalance());
+			}
+
+		}
+
+		if (temp == 0) {
+			System.out.println("Username and Password Incorrect");
+
+		}
+	}
+
+	void BalEnq(Customer customers[]) throws NumberFormatException, IOException {
+		int AccNo;
+		System.out.println("Enter Account Number to Check Balance : ");
+		AccNo = Integer.parseInt(br.readLine());
+		for (Customer customer : customers) {
+			if (customer.AccNo == AccNo) {
+				System.out.println("Balance : " + customer.getBalance());
+			}
+		}
+	}
+
+	void viewTransactions(Customer customers[]) throws NumberFormatException, IOException {
+		int AccNo;
+		System.out.println("Enter Account Number to view Transactions : ");
+		AccNo = Integer.parseInt(br.readLine());
+		for (Customer customer : customers) {
+			if (customer.AccNo == AccNo) {
+				System.out.println("Customer Name: " + customer.CustName);
+				System.out.println("Transactions: " + customer.Balance);
+			}
+		}
+	}
+
+	public static void main(String[] args)
+			throws NumberFormatException, IOException, UsernamePasswordIncorrectException {
+		// TODO Auto-generated method stub
 		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int choice;
-		do {
-			System.out.println("1. Edit Profile");
-			System.out.println("2. Transactions");
-			System.out.println("0. Logout");
-			System.out.println("Enter Choice: ");
-			choice = Integer.parseInt(br.readLine());
-			switch (choice) {
-			case 1:
-				obj.editProfile(customer);
-				break;
-			case 2:
-				obj.Transactions(customer);
-				break;
-			case 0:
-				System.out.println("Logging out...");
-				break;
-			default:
-				System.out.println("Enter Correct Choice....");
-			}
-		} while (choice != 0);
-	}
 
-	private void Transactions(CustomerEntity customer) throws NumberFormatException, IOException, SQLException {
-		// TODO Auto-generated method stub
+		System.out.println("Enter Number of Customers :");
+		int n = Integer.parseInt(br.readLine());
+		Customer customers[] = new Customer[n];
+		for (int i = 0; i < n; i++) {
+			Customer customer = new Customer();
+			System.out.println("Enter Customer Name : ");
+			customer.setCustName(br.readLine());
+			System.out.println("Enter Customer Password : ");
+			customer.setPassword(br.readLine());
+			System.out.println("Enter Customer Account Number : ");
+			customer.setAccNo(Integer.parseInt(br.readLine()));
+			System.out.println("Enter Deposite Amount : ");
+			customer.setBalance(Integer.parseInt(br.readLine()));
+			System.out.println("Enter Customer Mobile Number : ");
+			customer.setMobileNumber(Long.parseLong(br.readLine()));
+			System.out.println("Enter Gender : ");
+			customer.setGender(br.readLine());
+			System.out.println("Enter Customer Age : ");
+			customer.setAge(Integer.parseInt(br.readLine()));
+			System.out.println("Enter Customer Address : ");
+			customer.setAddress(br.readLine());
+			customers[i] = customer;
+			System.out.println("\n\n");
+
+		}
+//		for (Customer customer:customers)
+//		{
+//			System.out.println("Customer Name: "+customer.CustName);
+//			System.out.println("Customer Account Number: "+customer.AccNo);
+//			System.out.println("Customer Age: "+customer.Age);
+//			System.out.println("Customer Gender: "+customer.Gender);
+//			System.out.println("Customer Mobile Number: "+customer.MobileNumber);
+//			System.out.println("Customer Address: "+customer.Address);
+//		}
+		int choice;
 		BankApp obj = new BankApp();
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int choice;
 		do {
-			System.out.println("1. Deposit");
-			System.out.println("2. Withdraw");
-			System.out.println("3. Balance Enquiry");
-			System.out.println("0. Go Back");
-			System.out.println("Enter Choice: ");
-			choice = Integer.parseInt(br.readLine());
-			switch (choice) {
-			case 1:
-				obj.Deposit(customer);
-				break;
-			case 2:
-				obj.Withdraw(customer);
-				break;
-			case 3:
-				obj.balanceEnquiry(customer);
-				break;
-			case 0:
-				System.out.println("Going Back...");
-				break;
-			default:
-				System.out.println("Enter Correct Choice....");
-			}
-		} while (choice != 0);
 
-	}
-
-	private void balanceEnquiry(CustomerEntity customer) throws SQLException {
-		Connection con = BankConnection.getConn();
-
-		try {
-			PreparedStatement st = con.prepareStatement("SELECT depositedamount FROM customer where customerID =?");
-			st.setInt(1, customer.getCid());
-			ResultSet rs = st.executeQuery();
-			while (rs.next()) {
-				System.out.println("Total Balance: " + rs.getDouble("depositedamount"));
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-			BankConnection.closeConn();
-		}
-
-	}
-
-	private void Withdraw(CustomerEntity customer) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-		double balance = 0;
-		System.out.println("Enter Amount to Withdraw: ");
-		double amt = Double.parseDouble(this.br.readLine());
-		Connection con = BankConnection.getConn();
-		try {
-			PreparedStatement st = con.prepareStatement("SELECT depositedamount FROM customer where customerID =?");
-			st.setInt(1, customer.getCid());
-			ResultSet rs = st.executeQuery();
-			while (rs.next()) {
-				balance = rs.getInt(1) - amt;
-				PreparedStatement pst = con
-						.prepareStatement("UPDATE customer SET depositedamount=? WHERE customerID=? ");
-				pst.setDouble(1, balance);
-				pst.setInt(2, customer.getCid());
-
-				int status = pst.executeUpdate();
-				if (status == 1) {
-					System.out.println("Withdraw Successful... ");
-				}
-			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void Deposit(CustomerEntity customer) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-		double balance = 0;
-		System.out.println("Enter Amount to Deposit: ");
-		double amt = Double.parseDouble(this.br.readLine());
-		Connection con = BankConnection.getConn();
-		try {
-			PreparedStatement st = con.prepareStatement("SELECT depositedamount FROM customer where customerID =?");
-			st.setInt(1, customer.getCid());
-			ResultSet rs = st.executeQuery();
-			while (rs.next()) {
-				balance = amt + rs.getInt(1);
-
-				PreparedStatement pst = con
-						.prepareStatement("UPDATE customer SET depositedamount=? WHERE customerID=? ");
-				pst.setDouble(1, balance);
-				pst.setInt(2, customer.getCid());
-
-				int status = pst.executeUpdate();
-				if (status == 1) {
-					System.out.println("Deposited Successfully... ");
-				}
-			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	private void editProfile(CustomerEntity customer) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-		BankApp obj = new BankApp();
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int choice;
-		do {
-			System.out.println("1. Update Name");
-			System.out.println("2. Update Mobile Number");
-			System.out.println("3. Update Age");
-			System.out.println("0. Logout");
-			System.out.println("Enter Choice: ");
-			choice = Integer.parseInt(br.readLine());
-			switch (choice) {
-			case 1:
-				obj.updateName(customer);
-				break;
-			case 2:
-				obj.updateMobile(customer);
-				break;
-			case 3:
-				obj.updateAge(customer);
-				break;
-			case 0:
-				System.out.println("Logging out...");
-				break;
-			default:
-				System.out.println("Enter Correct Choice....");
-			}
-		} while (choice != 0);
-
-	}
-
-	private void updateAge(CustomerEntity customer) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-		System.out.println("Enter Age: ");
-		int cage = Integer.parseInt(this.br.readLine());
-		Connection con = BankConnection.getConn();
-		try {
-			PreparedStatement st = con.prepareStatement("update customer set age=? where customerID=?");
-			st.setLong(1, cage);
-			st.setInt(2, customer.getCid());
-			int result = st.executeUpdate();
-			if (result == 1) {
-				System.out.println("Age Updated Successfully");
-			} else {
-				System.out.println("Failed to Update ");
-			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	private void updateMobile(CustomerEntity customer) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-		System.out.println("Enter new Mobile Number: ");
-		long cmob = Long.parseLong(this.br.readLine());
-		Connection con = BankConnection.getConn();
-		try {
-			PreparedStatement st = con.prepareStatement("update customer set Mobileno=? where customerID=?");
-			st.setLong(1, cmob);
-			st.setInt(2, customer.getCid());
-			int result = st.executeUpdate();
-			if (result == 1) {
-				System.out.println("Mobile Number Updated Successfully");
-			} else {
-				System.out.println("Failed to Update ");
-			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-	}
-
-	private void updateName(CustomerEntity customer) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-		System.out.println("Enter new Name: ");
-		String cname = this.br.readLine();
-		Connection con = BankConnection.getConn();
-		try {
-			PreparedStatement st = con.prepareStatement("update customer set Name=? where customerID=?");
-			st.setString(1, cname);
-			st.setInt(2, customer.getCid());
-			int result = st.executeUpdate();
-			if (result == 1) {
-				System.out.println("Name Updated Successfully");
-			} else {
-				System.out.println("Failed to Update Name");
-			}
-			BankConnection.closeConn();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	}
-
-	public static void main(String[] args) throws NumberFormatException, IOException {
-		// TODO Auto-generated method stub
-
-		BankApp obj = new BankApp();
-		BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-		int choice;
-		do {
-			System.out.println("Welcome to ABC Bank");
-			System.out.println("1. Register as a new customer");
-			System.out.println("2. Existing customer? Login.");
+			System.out.println("1. Deposite");
+			System.out.println("2. WithDraw");
+			System.out.println("3. BalEnq");
+			System.out.println("4. Mini Statement");
 			System.out.println("0. Exit");
-			System.out.println("Enter Choice: ");
+
+			System.out.println("Enter Choice :");
 			choice = Integer.parseInt(br.readLine());
+
 			switch (choice) {
 			case 1:
-				obj.registerCustomer();
+				obj.Deposite(customers);
 				break;
 			case 2:
-				obj.Login();
+				obj.WithDraw(customers);
+				break;
+			case 3:
+				obj.BalEnq(customers);
+				break;
+			case 4:
+				obj.viewTransactions(customers);
 				break;
 			case 0:
-				System.out.println("Exiting...");
-				break;
+				System.exit(0);
 			default:
-				System.out.println("Enter Correct Choice....");
+				System.out.println("Please Enter Number Between 0 to 3");
 			}
 		} while (choice != 0);
 	}
