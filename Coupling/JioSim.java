@@ -1,4 +1,4 @@
-package com.coupling.ex;
+package com.DI;
 
 public class JioSim implements Sim {
 
